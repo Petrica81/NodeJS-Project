@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./fitness.db"
+}
+
+model User {
+  UserID       Int       @id @default(autoincrement())
+  Username     String    @unique
+  Password     String
+  Email        String    @unique
+  FullName     String?
+  DateOfBirth  DateTime?
+  Role         String    @default("USER")
+  TrainerID    Int?      @unique
+  Sessions     Session[]
+  Trainer      Trainer?  @relation(name: "TrainerToUser", fields: [TrainerID], references: [TrainerID])
+}
+
+model Trainer {
+  TrainerID     Int       @id @default(autoincrement())
+  FullName      String
+  Email         String    @unique
+  Phone         String?
+  Specialization String?
+  Sessions      Session[]
+  User          User?     @relation(name: "TrainerToUser")
+}
+
+model Facility {
+  FacilityID    Int       @id @default(autoincrement())
+  Name          String
+  Type          String
+  Address       String
+  Capacity      Int?
+  ContactNumber String?
+  Sessions      Session[]
+}
+
+model Session {
+  SessionID     Int       @id @default(autoincrement())
+  UserID        Int
+  TrainerID     Int
+  FacilityID    Int
+  SessionDateTime DateTime
+  Duration      Int
+  User          User      @relation(fields: [UserID], references: [UserID], onDelete: Cascade)
+  Trainer       Trainer   @relation(fields: [TrainerID], references: [TrainerID], onDelete: Cascade)
+  Facility      Facility  @relation(fields: [FacilityID], references: [FacilityID], onDelete: Cascade)
+}
