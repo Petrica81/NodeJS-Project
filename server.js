@@ -17,6 +17,15 @@ server.use("/facility", facilityRoutes);
 
 const PORT = process.env.PORT || 3000;
 
+//sa verific daca functioneaza legatura cu postman
+server.get("/status", (request, response) => {
+  const status = {
+     "Status": "Running"
+  };
+  
+  response.send(status);
+});
+
 server.get("/", (req, res) => {
     res.send("Bine ai venit in aplicatie!");
   });
