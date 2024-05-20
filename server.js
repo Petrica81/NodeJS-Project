@@ -2,18 +2,18 @@
 const express = require("express");
 const server = express();
 
-// const userRoutes = require("./routes/userRoutes");
-// const trainerRoutes = require("./routes/trainerRoutes");
-// const sessionRoutes = require("./routes/sessionRoutes");
-// const facilityRoutes = require("./routes/facilityRoutes");
+const userRoutes = require("./routes/userRoutes");
+const trainerRoutes = require("./routes/trainerRoutes");
+const sessionRoutes = require("./routes/sessionRoutes");
+const facilityRoutes = require("./routes/facilityRoutes");
 
 
 server.use(express.json());
 
-// server.use("/user", userRoutes);
-// server.use("/trainer", trainerRoutes);
-// server.use("/session", sessionRoutes);
-// server.use("/facility", facilityRoutes);
+server.use("/user", userRoutes);
+server.use("/trainer", trainerRoutes);
+server.use("/session", sessionRoutes);
+server.use("/facility", facilityRoutes);
 
 const PORT = process.env.PORT || 3000;
 
