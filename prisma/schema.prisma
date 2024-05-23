@@ -52,7 +52,6 @@ model Session {
   TrainerID     Int
   FacilityID    Int
   SessionDateTime DateTime
-  Duration      Int
   User          User      @relation(fields: [UserID], references: [UserID], onDelete: Cascade)
   Trainer       Trainer   @relation(fields: [TrainerID], references: [TrainerID], onDelete: Cascade)
   Facility      Facility  @relation(fields: [FacilityID], references: [FacilityID], onDelete: Cascade)

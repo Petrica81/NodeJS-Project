@@ -82,68 +82,68 @@ const login = async (request, response) => {
   }
 };
 
-const createUser = async (req, res) => {
+const createUser = async (request, response) => {
     try {
-      const user = await prisma.user.create({ data: req.body });
-      res.status(StatusCodes.CREATED).json(user);
+      const user = await prisma.user.create({ data: request.body });
+      response.status(StatusCodes.CREATED).json(user);
     } catch (error) {
-      res.status(StatusCodes.BAD_REQUEST).json({ message: `Error creating user: ${error}` });
+      response.status(StatusCodes.BAD_REQUEST).json({ message: `Error creating user: ${error}` });
     }
   };
   
-const getAllUsers = async (req, res) => {
+const getAllUsers = async (request, response) => {
     try {
       const users = await prisma.user.findMany();
       const usersWithoutPassword = users.map((user) => {
         const { Password, ...usersWithoutPassword} = user;
         return usersWithoutPassword;
       });
-      res.status(StatusCodes.OK).json(usersWithoutPassword);
+      response.status(StatusCodes.OK).json(usersWithoutPassword);
     } catch (error) {
-      res.status(StatusCodes.BAD_REQUEST).json({ message: `Error fetching users: ${error}` });
+      response.status(StatusCodes.BAD_REQUEST).json({ message: `Error fetching users: ${error}` });
     }
   };
   
-const getUserById = async (req, res) => {
+const getUserById = async (request, response) => {
     try {
-      const user = await prisma.user.findUnique({ where: { UserID: parseInt(req.params.id) }});
+      const user = await prisma.user.findUnique({ where: { UserID: parseInt(request.params.id) }});
       if (!user) {
-        return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
+        return response.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
       }
       const { Password, ...userWithoutPassword} = user;
 
-      res.status(StatusCodes.OK).json(userWithoutPassword);
+      response.status(StatusCodes.OK).json(userWithoutPassword);
     } catch (error) {
-      res.status(StatusCodes.BAD_REQUEST).json({ message: `Error fetching user: ${error}` });
+      response.status(StatusCodes.BAD_REQUEST).json({ message: `Error fetching user: ${error}` });
     }
   };
   
-const updateUser = async (req, res) => {
+const updateUser = async (request, response) => {
     try {
-      console.log(await getRoleFromToken(req));
-      console.log(await getUserIdFromToken(req));
-      if(await getRoleFromToken(req) !== 'ADMIN' && await getUserIdFromToken(req) !== parseInt(req.params.id)) {
+      console.log(await getRoleFromToken(request));
+      console.log(await getUserIdFromToken(request));
+      if(await getRoleFromToken(request) !== 'ADMIN' && await getUserIdFromToken(request) !== parseInt(request.params.id)) {
         throw new Error('You are not the owner of this account!');
       }
       const user = await prisma.user.update({
-        where: { UserID: parseInt(req.params.id) },
-        data: req.body,
+        where: { UserID: parseInt(request.params.id) },
+        data: request.body,
       });
-      res.status(StatusCodes.OK).json(user);
+      response.status(StatusCodes.OK).json(user);
     } catch (error) {
-      res.status(StatusCodes.BAD_REQUEST).json({ message: `Error updating user: ${error}` });
+      response.status(StatusCodes.BAD_REQUEST).json({ message: `Error updating user: ${error}` });
     }
   };
   
-const deleteUser = async (req, res) => {
+const deleteUser = async (request, response) => {
     try {
-      if(getRoleFromToken(req) !== 'ADMIN' && getUserIdFromToken(req) !== req.params.id) {
+      if(getRoleFromToken(request) !== 'ADMIN' && getUserIdFromToken(request) !== request.params.id) {
         throw new Error('You are not the owner of this account!');
       }
-      await prisma.user.delete({ where: { UserID: parseInt(req.params.id) } });
-      res.status(StatusCodes.NO_CONTENT).send();
+      await prisma.user.delete({ where: { UserID: parseInt(request.params.id) } });
+      response.status(StatusCodes.NO_CONTENT).send();
     } catch (error) {
-      res.status(StatusCodes.BAD_REQUEST).json({ message: `Error deleting user: ${error}` });
+      response.status(StatusCodes.BAD_REQUEST).json({ message: `Error deleting user: ${error}` });
     }
   };
 
