@@ -4,17 +4,16 @@ const { StatusCodes } = require("http-status-codes");
 const jwt = require('jsonwebtoken');
 const prisma = new PrismaClient();
 
-const validateSession = async (request, response, next) => {
+const validateSession = async (req, res, next) => {
     try {
-        const { FacilityID, TrainerID, SessionDateTime } = request.body;
-        const token = request.headers.authorization.split(" ")[1];
+        const { FacilityID, TrainerID, SessionDateTime } = req.body;
+        const token = req.headers.authorization.split(" ")[1];
         const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
         const userID = decodedToken.UserID;
 
-        const session = request.body;
-        const sessionStart = new Date(sessionDateTime);
-        //durata unei sesiuni este de o ora
-        const sessionEnd = new Date(sessionStart.getTime() + 60 * 60000); 
+        const sessionStart = new Date(SessionDateTime);
+        // durata unei sesiuni este de o oră
+        const sessionEnd = new Date(sessionStart.getTime() + 60 * 60000);
 
         const user = await prisma.user.findUniqueOrThrow({
             where: { UserID: parseInt(userID) },
@@ -24,40 +23,38 @@ const validateSession = async (request, response, next) => {
             where: { FacilityID: parseInt(FacilityID) },
         });
 
-        const overlappingSessions = await prisma.session.findMany(
-            {
-                where:{
-                    FacilityID: parseInt(FacilityID),
-                    SessionDateTime:{
-                        gte: sessionStart,
-                        lt: sessionEnd,
-                    }
-                }
-            }
-        );
-        if(overlappingSessions.length >= facility.Capacity){
-            throw new Error(`The facility has reached its capacity of ${facility.capacity} sessions for the selected time interval.`);
+        const overlappingSessions = await prisma.session.findMany({
+            where: {
+                FacilityID: parseInt(FacilityID),
+                SessionDateTime: {
+                    gte: sessionStart,
+                    lt: sessionEnd,
+                },
+            },
+        });
+
+        if (overlappingSessions.length >= facility.Capacity) {
+            throw new Error(`The facility has reached its capacity of ${facility.Capacity} sessions for the selected time interval.`);
         }
 
         const overlappingTrainerSessions = await prisma.session.findMany({
             where: {
-              trainerId: parseInt(trainerId),
-              sessionDateTime: {
-                gte: sessionStart,
-                lt: sessionEnd,
-              },
+                TrainerID: parseInt(TrainerID),
+                SessionDateTime: {
+                    gte: sessionStart,
+                    lt: sessionEnd,
+                },
             },
-          });
-      
-          if (overlappingTrainerSessions.length > 0) {
+        });
+
+        if (overlappingTrainerSessions.length > 0) {
             throw new Error(`The trainer already has a session in the selected time interval.`);
-          }
-      
-          next();
+        }
+
+        next();
+    } catch (error) {
+        res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
     }
-    catch (error) {
-        response.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
-      }
 };
 
 module.exports = validateSession;

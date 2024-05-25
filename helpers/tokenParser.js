@@ -8,11 +8,9 @@ const getUserIdFromToken = async (request) => {
 };
 
 const getRoleFromToken = async (request) => {
-  const role = jwt.verify(
-    request.headers.authorization.split(" ")[1],
-    process.env.SECRET_KEY
-  ).Role;
-  return role;
+  const token = request.headers.authorization.split(" ")[1];
+  const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+  return decodedToken.Role;
 };
 
 module.exports = { getUserIdFromToken, getRoleFromToken };

@@ -6,7 +6,7 @@ const prisma = new  PrismaClient();
 const createFacility = async (req, res) => {
     try{
         const facility = await prisma.facility.create({ data: req.body });
-        re.status(StatusCodes.CREATED).json(facility);
+        res.status(StatusCodes.CREATED).json(facility);
     }
     catch (error){
         res.status(StatusCodes.BAD_REQUEST)

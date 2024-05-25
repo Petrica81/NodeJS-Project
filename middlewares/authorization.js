@@ -31,7 +31,7 @@ const verifyAdmin = async (request, response, next) => {
     try {
         const token = request.headers.authorization.split(" ")[1];
         const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
-        const role = decodedToken.role;
+        const role = decodedToken.Role;
 
         if(role !== "ADMIN") {
             throw new Error("Admin role is needed!");

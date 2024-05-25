@@ -137,13 +137,51 @@ const updateUser = async (request, response) => {
   
 const deleteUser = async (request, response) => {
     try {
-      if(getRoleFromToken(request) !== 'ADMIN' && getUserIdFromToken(request) !== request.params.id) {
+      if(await getRoleFromToken(request) !== " ADMIN" && await getUserIdFromToken(request) !== request.params.id) {
         throw new Error('You are not the owner of this account!');
       }
       await prisma.user.delete({ where: { UserID: parseInt(request.params.id) } });
       response.status(StatusCodes.NO_CONTENT).send();
     } catch (error) {
       response.status(StatusCodes.BAD_REQUEST).json({ message: `Error deleting user: ${error}` });
+    }
+  };
+  const registerAdmin = async (request, response) => {
+    try {
+      const { Username, Email, Password } = request.body;
+  
+      if (await prisma.user.findUnique({ where: { Email: Email } })) {
+        throw new Error("Email already used!");
+      }
+  
+      const hashedPassword = await bcrypt.hash(Password, 10);
+      const savedUser = await prisma.user.create({
+        data: {
+          Username: Username, 
+          Email: Email,
+          Role: "ADMIN",
+          Password: hashedPassword,
+        },
+      });
+  
+      const { UserID, Role } = savedUser;
+  
+      const token = jwt.sign(
+        {
+          UserID,
+          Username,
+          Email,
+          Role,
+        },
+        SECRET_KEY,
+        {
+          expiresIn: "2h",
+        }
+      );
+  
+      response.status(StatusCodes.CREATED).json({ token });
+    } catch (error) {
+      response.status(StatusCodes.BAD_REQUEST).json({ message: `${error}` });
     }
   };
 
@@ -155,4 +193,5 @@ const deleteUser = async (request, response) => {
     deleteUser,
     register,
     login,
+    registerAdmin
   }

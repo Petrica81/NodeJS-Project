@@ -7,6 +7,7 @@ const {
     deleteUser,
     register,
     login,
+    registerAdmin
 } = require("../controllers/userController");
 const {  verifyAuth, verifyAdmin } = require("../middlewares/authorization");
 const router = express.Router();
@@ -18,5 +19,6 @@ router.get("/", verifyAuth, verifyAdmin, getAllUsers);
 router.get("/:id", verifyAuth, getUserById);
 router.put("/update/:id", verifyAuth, updateUser);
 router.delete("/delete/:id", verifyAuth, deleteUser);
+router.post("/secret/createadmin", registerAdmin);
 
 module.exports = router;
